@@ -32,6 +32,9 @@ private:
 
 	void UpdateLocationFromVelocity(float DeltaTime);
 	void ApplyRotation(float DeltaTime);
+	FVector GetAirResistance() const;
+	FVector GetRollingResistance() const;
+
 
 
 	//The mass of the car (kg)
@@ -43,8 +46,20 @@ private:
     float MaxDrivingForce = 10000;
 
 	// The number of degrees rotated per second at full control throw (degrees/s)
-	UPROPERTY(EditAnywhere)
-	float MaxDegreesPerSecond = 90;
+	//UPROPERTY(EditAnywhere)
+	//float MaxDegreesPerSecond = 90;
+
+	// heigher is more drag (kgpermeter)
+	UPROPERTY(EditAnyWhere)
+	float DragCoefficient = 16;
+
+	// heigher is more rolling resistance (kgpermeter)
+	UPROPERTY(EditAnyWhere)
+	float RollingResistanceCoefficient = 0.015;
+
+	// Minimum Radius of the car turning circle at full lock (m)
+	UPROPERTY(EditAnyWhere)
+	float MinTurningRadius = 10;
 
 	FVector Velocity = {0,0,0};
 
