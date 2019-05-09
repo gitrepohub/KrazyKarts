@@ -63,22 +63,23 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	void SimulateMove(FGoKartMove Move);
 
 	void MoveForward(float Val);
 	void MoveRight(float Val);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_MoveForward(float Val);
+	void Server_SendMove(FGoKartMove Move);
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_MoveRight(float Val);
 
 	void UpdateLocationFromVelocity(float DeltaTime);
-	void ApplyRotation(float DeltaTime);
+	void ApplyRotation(float DeltaTime, float StreeringThrow);
 	FVector GetAirResistance() const;
 	FVector GetRollingResistance() const;
 
-
+	FVector Velocity = FVector(0);
+	float Throttle = 0.0f;
+	float SteeringThrow = 0.0f;
 
 	//The mass of the car (kg)
 	UPROPERTY(EditAnywhere)
@@ -104,19 +105,10 @@ private:
 	UPROPERTY(EditAnyWhere)
 	float MinTurningRadius = 10;
 
-	UPROPERTY(Replicated)
-	FVector Velocity = FVector(0);
-
-	UPROPERTY(ReplicatedUsing= OnRep_ReplicatedTransform)
-	FTransform ReplicatedTransform;
+	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
+	FGoKartState ServerState;
 
 	UFUNCTION()
-	void OnRep_ReplicatedTransform();
-
-	UPROPERTY(Replicated)
-	float Throttle = 0.0f;
-
-	UPROPERTY(Replicated)
-	float SteeringThrow = 0.0f;
+	void OnRep_ServerState();
 
 };
