@@ -38,8 +38,8 @@ public:
 	void SimulateMove(const FGoKartMove& Move);
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& InVelocity);
-	void SetThrottle(const float& InThrottle);
-	void SetSteeringThrow(const float& InSteeringThrow);
+	void SetThrottle(const float InThrottle);
+	void SetSteeringThrow(const float InSteeringThrow);
 
 
 

@@ -46,12 +46,12 @@ void UGoKartMovementComponent::SetVelocity(const FVector& InVelocity)
 	Velocity = InVelocity;
 }
 
-void UGoKartMovementComponent::SetThrottle(const float& InThrottle)
+void UGoKartMovementComponent::SetThrottle(const float InThrottle)
 {
 	Throttle = InThrottle;
 }
 
-void UGoKartMovementComponent::SetSteeringThrow(const float& InSteeringThrow)
+void UGoKartMovementComponent::SetSteeringThrow(const float InSteeringThrow)
 {
 	SteeringThrow = InSteeringThrow;
 }
