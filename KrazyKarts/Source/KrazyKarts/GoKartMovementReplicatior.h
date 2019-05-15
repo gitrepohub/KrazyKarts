@@ -31,22 +31,23 @@ class KRAZYKARTS_API UGoKartMovementReplicatior : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UGoKartMovementReplicatior();
-	FGoKartMove GetLastMove() const { return ServerState.LastMove; }
-	void SetServerState(FGoKartState InServerState) { ServerState = InServerState;  }
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SendMove(FGoKartMove Move);
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	void ClearAcknowledgeMoves(const FGoKartMove& LastMove);
+
+	void UpdateServerState(const FGoKartMove& Move);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SendMove(FGoKartMove Move);
 
 	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
 	FGoKartState ServerState;

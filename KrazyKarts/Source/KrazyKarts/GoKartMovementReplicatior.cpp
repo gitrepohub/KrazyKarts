@@ -38,26 +38,36 @@ void UGoKartMovementReplicatior::TickComponent(float DeltaTime, ELevelTick TickT
 
 	if (MovementComponent == nullptr) return;
 
+	FGoKartMove LastMove = MovementComponent->GetLastMove();
+
 	if (GetOwnerRole() == ROLE_AutonomousProxy) // client
 	{
-		FGoKartMove Move = MovementComponent->CreateMove(DeltaTime);
-		MovementComponent->SimulateMove(Move);
-		Server_SendMove(Move);
+		UnacknowledgedMoves.Add(LastMove);
+		Server_SendMove(LastMove);
 	}
 
 	// We are the server and in control of the pawn
-	if (GetOwnerRole() == ROLE_Authority && GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
+	if (GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
 	{
-		FGoKartMove Move = MovementComponent->CreateMove(DeltaTime);
-		Server_SendMove(Move);
+		UpdateServerState(LastMove);
 	}
 
 	// update server moves on client
 	if (GetOwnerRole() == ROLE_SimulatedProxy)
 	{
-		MovementComponent->SimulateMove(GetLastMove());
+		MovementComponent->SimulateMove(ServerState.LastMove);
 	}
 
+}
+
+
+
+void UGoKartMovementReplicatior::UpdateServerState(const FGoKartMove& Move)
+
+{
+	ServerState.LastMove = Move;
+	ServerState.Tranform = GetOwner()->GetActorTransform();
+	ServerState.Velocity = MovementComponent->GetVelocity();
 }
 
 
@@ -105,13 +115,7 @@ void UGoKartMovementReplicatior::Server_SendMove_Implementation(FGoKartMove Move
 	if (MovementComponent == nullptr) return;
 
 	MovementComponent->SimulateMove(Move);
-
-	FGoKartState ServerState;
-	ServerState.LastMove = Move;
-	ServerState.Tranform = GetOwner()->GetActorTransform();
-	ServerState.Velocity = MovementComponent->GetVelocity();
-
-	SetServerState(ServerState);
+	UpdateServerState(Move);
 }
 
 

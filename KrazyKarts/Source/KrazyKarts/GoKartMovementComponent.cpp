@@ -32,29 +32,14 @@ void UGoKartMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+
+	if (GetOwnerRole() == ROLE_AutonomousProxy || GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
+	{
+		LastMove = CreateMove(DeltaTime);
+		SimulateMove(LastMove);
+	}
 }
 
-
-FVector UGoKartMovementComponent::GetVelocity() const
-{
-	return Velocity;
-}
-
-void UGoKartMovementComponent::SetVelocity(const FVector& InVelocity)
-{
-	Velocity = InVelocity;
-}
-
-void UGoKartMovementComponent::SetThrottle(const float InThrottle)
-{
-	Throttle = InThrottle;
-}
-
-void UGoKartMovementComponent::SetSteeringThrow(const float InSteeringThrow)
-{
-	SteeringThrow = InSteeringThrow;
-}
 
 void UGoKartMovementComponent::SimulateMove(const FGoKartMove& Move)
 {
@@ -72,6 +57,7 @@ void UGoKartMovementComponent::SimulateMove(const FGoKartMove& Move)
 	UpdateLocationFromVelocity(Move.DeltaTime);
 }
 
+
 FGoKartMove UGoKartMovementComponent::CreateMove(float DeltaTime)
 {
 	FGoKartMove Move;
@@ -88,8 +74,6 @@ FVector UGoKartMovementComponent::GetAirResistance()
 {
 	return -Velocity.GetSafeNormal() * Velocity.SizeSquared() * DragCoefficient;
 }
-
-
 
 FVector UGoKartMovementComponent::GetRollingResistance()
 {
@@ -121,4 +105,25 @@ void UGoKartMovementComponent::UpdateLocationFromVelocity(float DeltaTime)
 	{
 		Velocity = FVector::ZeroVector;
 	}
+}
+
+
+FVector UGoKartMovementComponent::GetVelocity() const
+{
+	return Velocity;
+}
+
+void UGoKartMovementComponent::SetVelocity(const FVector& InVelocity)
+{
+	Velocity = InVelocity;
+}
+
+void UGoKartMovementComponent::SetThrottle(const float InThrottle)
+{
+	Throttle = InThrottle;
+}
+
+void UGoKartMovementComponent::SetSteeringThrow(const float InSteeringThrow)
+{
+	SteeringThrow = InSteeringThrow;
 }

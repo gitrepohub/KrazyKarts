@@ -34,37 +34,33 @@ public:
 	// Sets default values for this component's properties
 	UGoKartMovementComponent();
 
-	FGoKartMove CreateMove(float DeltaTime);
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	void SimulateMove(const FGoKartMove& Move);
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& InVelocity);
 	void SetThrottle(const float InThrottle);
 	void SetSteeringThrow(const float InSteeringThrow);
-
+	FGoKartMove GetLastMove() const { return LastMove;  }
 
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 		
 private:
-
+	FGoKartMove CreateMove(float DeltaTime);
 	FVector GetAirResistance();
 	FVector GetRollingResistance();
+	void ApplyRotation(float DeltaTime, float InSteeringThrow);
+	void UpdateLocationFromVelocity(float DeltaTime);
 
 	FVector Velocity;
 
 	float Throttle;
 	float SteeringThrow;
-
-	void ApplyRotation(float DeltaTime, float InSteeringThrow);
-
-	void UpdateLocationFromVelocity(float DeltaTime);
+	FGoKartMove LastMove;
 
 	// The mass of the car (kg).
 	UPROPERTY(EditAnywhere)
