@@ -43,8 +43,8 @@ protected:
 
 private:
 	void ClearAcknowledgeMoves(const FGoKartMove& LastMove);
-
 	void UpdateServerState(const FGoKartMove& Move);
+	void ClientTick(float DeltaTime);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendMove(FGoKartMove Move);
@@ -54,10 +54,16 @@ private:
 
 	UFUNCTION()
 	void OnRep_ServerState();
-
-	TArray<FGoKartMove> UnacknowledgedMoves;
+	void SimulatedProxy_OnRep_ServerState();
+	void AutonomusProxy_OnRep_ServerState();
 
 	UPROPERTY()
 	UGoKartMovementComponent* MovementComponent = nullptr;
+
+	TArray<FGoKartMove> UnacknowledgedMoves;
+
+	float ClientTimeSinceUpdate = 0.0f;
+	float ClientTimeBetweenLastUpdates = 0.0f;
+	FTransform ClientStartTransform;
 
 };
