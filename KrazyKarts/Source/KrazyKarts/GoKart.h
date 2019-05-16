@@ -37,9 +37,9 @@ private:
 	void MoveRight(float Value);
 
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UGoKartMovementComponent* MovementComponent = nullptr;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UGoKartMovementReplicatior* MovementReplicator = nullptr;
 };

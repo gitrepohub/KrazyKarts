@@ -113,7 +113,10 @@ void UGoKartMovementReplicatior::ClientTick(float DeltaTime)
 void UGoKartMovementReplicatior::InterpolateLocation(const FHermiteCubicSpline& Spline, float LerpRatio)
 {
 	FVector NewLocation = Spline.InterpolateLocation(LerpRatio);
-	GetOwner()->SetActorLocation(NewLocation);
+	if (MeshOffsetRoot != nullptr)
+	{
+		MeshOffsetRoot->SetWorldLocation(NewLocation);
+	}
 }
 
 void UGoKartMovementReplicatior::InterpolateVelocity(const FHermiteCubicSpline& Spline, float LerpRatio, float fVelocityToDerivative)
@@ -128,7 +131,10 @@ void UGoKartMovementReplicatior::InterpolateRotation(float LerpRatio)
 	FQuat TargetRotation = ServerState.Tranform.GetRotation();
 	FQuat StartRotation = ClientStartTransform.GetRotation();
 	FQuat NewRotation = FQuat::Slerp(StartRotation, TargetRotation, LerpRatio);
-	GetOwner()->SetActorRotation(NewRotation);
+	if (MeshOffsetRoot != nullptr)
+	{
+		MeshOffsetRoot->SetWorldRotation(NewRotation);
+	}
 }
 
 
@@ -162,8 +168,14 @@ void UGoKartMovementReplicatior::SimulatedProxy_OnRep_ServerState()
 	ClientTimeBetweenLastUpdates = ClientTimeSinceUpdate;
 	ClientTimeSinceUpdate = 0.0f;
 
-	ClientStartTransform = GetOwner()->GetActorTransform();
+	if (MeshOffsetRoot != nullptr)
+	{
+		ClientStartTransform.SetLocation(MeshOffsetRoot->GetComponentLocation());
+		ClientStartTransform.SetRotation(MeshOffsetRoot->GetComponentQuat());
+	}
+
 	ClentStartVelocity = MovementComponent->GetVelocity();
+	GetOwner()->SetActorTransform(ServerState.Tranform);
 }
 
 
@@ -182,6 +194,34 @@ void UGoKartMovementReplicatior::AutonomusProxy_OnRep_ServerState()
 	}
 }
 
+void UGoKartMovementReplicatior::Server_SendMove_Implementation(FGoKartMove Move)
+{
+	if (MovementComponent == nullptr) return;
+
+	ClientSimulatedTime += Move.DeltaTime;
+	MovementComponent->SimulateMove(Move);
+	UpdateServerState(Move);
+}
+
+
+bool UGoKartMovementReplicatior::Server_SendMove_Validate(FGoKartMove Move)
+{
+	float ProposedTime = ClientSimulatedTime + Move.DeltaTime;
+	bool  ClientNotRunningAhead = ProposedTime < GetWorld()->TimeSeconds;
+	if (!ClientNotRunningAhead)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Client is running too fast"));
+		return false;
+	}
+
+	if (!Move.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Client move is not valid"));
+		return false;
+	}
+
+	return true;
+}
 
 void UGoKartMovementReplicatior::ClearAcknowledgeMoves(const FGoKartMove& LastMove)
 {
@@ -196,19 +236,4 @@ void UGoKartMovementReplicatior::ClearAcknowledgeMoves(const FGoKartMove& LastMo
 	}
 
 	UnacknowledgedMoves = NewMoves;
-}
-
-
-void UGoKartMovementReplicatior::Server_SendMove_Implementation(FGoKartMove Move)
-{
-	if (MovementComponent == nullptr) return;
-
-	MovementComponent->SimulateMove(Move);
-	UpdateServerState(Move);
-}
-
-
-bool UGoKartMovementReplicatior::Server_SendMove_Validate(FGoKartMove Move)
-{
-	return true; //TODO: Make better validation
 }

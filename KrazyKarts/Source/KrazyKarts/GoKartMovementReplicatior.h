@@ -67,6 +67,15 @@ private:
 	void InterpolateRotation(float LerpRatio);
 	float VelocityToDerivative() const;
 
+	TArray<FGoKartMove> UnacknowledgedMoves;
+
+	float ClientTimeSinceUpdate = 0.0f;
+	float ClientTimeBetweenLastUpdates = 0.0f;
+	FTransform ClientStartTransform;
+	FVector ClentStartVelocity;
+
+	float ClientSimulatedTime = 0.0f;
+
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendMove(FGoKartMove Move);
@@ -82,11 +91,10 @@ private:
 	UPROPERTY()
 	UGoKartMovementComponent* MovementComponent = nullptr;
 
-	TArray<FGoKartMove> UnacknowledgedMoves;
+	UPROPERTY()
+	USceneComponent* MeshOffsetRoot = nullptr;
 
-	float ClientTimeSinceUpdate = 0.0f;
-	float ClientTimeBetweenLastUpdates = 0.0f;
-	FTransform ClientStartTransform;
-	FVector ClentStartVelocity;
+	UFUNCTION(BlueprintCallable)
+	void SetMeshOffsetRoot(USceneComponent* Root) { MeshOffsetRoot = Root;  }
 
 };
